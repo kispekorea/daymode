@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, ChevronLeft, ChevronRight, Check, Trash2, Edit2 } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Check, Trash2, Edit2, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useFirestoreCollection } from '../lib/useFirestoreSync';
 import { WishlistItem, ItemType, WishNecessity } from '../types';
@@ -38,7 +38,10 @@ export default function WishlistView() {
   const [viewTab, setViewTab] = useState<'expense' | 'wish'>('expense');
 
   // Form State
-  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(() => {
+    const offset = new Date().getTimezoneOffset() * 60000;
+    return new Date(Date.now() - offset).toISOString().split('T')[0];
+  });
   const [type, setType] = useState<ItemType>('expense');
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
@@ -81,27 +84,32 @@ export default function WishlistView() {
   const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
     const placeholderImg = 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=600&auto=format&fit=crop';
     
-    if (editingId) {
-      updateItem(editingId, { date, name: name.trim(), imageUrl: type === 'wish' ? (imageUrl.trim() || placeholderImg) : '', type, necessity: type === 'wish' ? necessity : 'essential', price: price || '0', linkUrl: type === 'wish' ? linkUrl.trim() : '' });
-    } else {
-      const id = Date.now().toString();
-      updateItem(id, {
-        id,
-        date,
-        name: name.trim(),
-        imageUrl: type === 'wish' ? (imageUrl.trim() || placeholderImg) : '',
-        type,
-        status: type === 'expense' ? 'bought' : 'wish',
-        necessity: type === 'wish' ? necessity : 'essential',
-        price: price || '0',
-        linkUrl: type === 'wish' ? linkUrl.trim() : ''
-      });
+    try {
+      if (editingId) {
+        await updateItem(editingId, { date, name: name.trim(), imageUrl: type === 'wish' ? (imageUrl.trim() || placeholderImg) : '', type, necessity: type === 'wish' ? necessity : 'essential', price: price || '0', linkUrl: type === 'wish' ? linkUrl.trim() : '' });
+      } else {
+        const id = Date.now().toString();
+        await updateItem(id, {
+          id,
+          date,
+          name: name.trim(),
+          imageUrl: type === 'wish' ? (imageUrl.trim() || placeholderImg) : '',
+          type,
+          status: type === 'expense' ? 'bought' : 'wish',
+          necessity: type === 'wish' ? necessity : 'essential',
+          price: price || '0',
+          linkUrl: type === 'wish' ? linkUrl.trim() : ''
+        });
+      }
+    } catch (err: any) {
+      alert("데이터 저장 실패: " + err?.message);
+      return;
     }
 
     setIsAdding(false);
@@ -111,11 +119,13 @@ export default function WishlistView() {
     setImageUrl('');
     setLinkUrl('');
     setNecessity('thinking');
-    setDate(new Date().toISOString().split('T')[0]);
+    const offset = new Date().getTimezoneOffset() * 60000;
+    setDate(new Date(Date.now() - offset).toISOString().split('T')[0]);
   };
 
   const markAsBought = (id: string) => {
-    updateItem(id, { status: 'bought', date: new Date().toISOString().split('T')[0] });
+    const offset = new Date().getTimezoneOffset() * 60000;
+    updateItem(id, { status: 'bought', date: new Date(Date.now() - offset).toISOString().split('T')[0] });
   };
 
   const updateNecessity = (id: string, currentNecessity: WishNecessity) => {
@@ -167,16 +177,19 @@ export default function WishlistView() {
             setImageUrl('');
             setLinkUrl('');
             setNecessity('thinking');
-            setDate(new Date().toISOString().split('T')[0]);
+            const offset = new Date().getTimezoneOffset() * 60000;
+            setDate(new Date(Date.now() - offset).toISOString().split('T')[0]);
           } else {
             setIsAdding(true);
             setEditingId(null);
+            setType(viewTab);
             setName('');
             setPrice('');
             setImageUrl('');
             setLinkUrl('');
             setNecessity('thinking');
-            setDate(new Date().toISOString().split('T')[0]);
+            const offset = new Date().getTimezoneOffset() * 60000;
+            setDate(new Date(Date.now() - offset).toISOString().split('T')[0]);
           }
         }} className="bg-stone-900 text-white w-9 h-9 rounded-full flex items-center justify-center hover:bg-stone-800 transition-transform active:scale-95 shadow-sm">
           <Plus size={18} className={isAdding && !editingId ? "rotate-45" : "transition-transform"} />
@@ -192,26 +205,26 @@ export default function WishlistView() {
             className="bg-white p-5 rounded-2xl shadow-sm border border-stone-100 mb-6 space-y-3 overflow-hidden"
             onSubmit={handleAdd}
           >
-            <div className="flex gap-2 mb-2">
-              <button type="button" onClick={() => setType('expense')} className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition-colors ${type === 'expense' ? 'bg-green-50 text-green-700 border border-green-200/50' : 'bg-stone-50 text-stone-500 hover:bg-stone-100 border border-transparent'}`}>👛 소비 기록</button>
-              <button type="button" onClick={() => setType('wish')} className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition-colors ${type === 'wish' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/50' : 'bg-stone-50 text-stone-500 hover:bg-stone-100 border border-transparent'}`}>✨ 위시 아이템</button>
-            </div>
-            
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-stone-300 outline-none" required />
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="항목 이름" className="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-stone-300 outline-none" required />
-            <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="금액 (예: 15,000)" className="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-stone-300 outline-none" />
+            {type === 'wish' && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-3">
+                <label className="block w-full aspect-[2/1] bg-stone-50 border border-stone-200 border-dashed rounded-xl flex flex-col items-center justify-center text-stone-400 cursor-pointer overflow-hidden transition-all hover:bg-stone-100 relative group">
+                  {imageUrl ? (
+                    <img src={imageUrl} alt="preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="flex items-center gap-2 font-bold text-[13px]"><ImageIcon size={18} /> 갤러리에서 사진 첨부</div>
+                  )}
+                  <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                </label>
+              </motion.div>
+            )}
+
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="항목 이름" className="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-[14px] font-medium focus:ring-1 focus:ring-stone-300 outline-none" required />
+            <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="금액 (예: 15,000)" className="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-[14px] font-medium focus:ring-1 focus:ring-stone-300 outline-none" />
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-[13px] text-stone-500 focus:ring-1 focus:ring-stone-300 outline-none font-bold" required />
             
             {type === 'wish' && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                {imageUrl && <img src={imageUrl} alt="preview" className="w-full h-32 object-cover rounded-xl mb-3 border border-stone-100" />}
-                <div className="flex gap-2 mb-3">
-                  <label className="flex-1 bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-sm text-center text-stone-500 hover:bg-stone-100 cursor-pointer transition-colors cursor-pointer flex items-center justify-center gap-2">
-                    <Check size={16} className={imageUrl ? "text-green-500" : "hidden"} />
-                    {imageUrl ? '사진 변경' : '사진 첨부 (갤러리)'}
-                    <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                  </label>
-                </div>
-                <input type="url" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="참고 URL (선택사항)" className="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-stone-300 outline-none mb-3" />
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2">
+                <input type="url" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="참고 URL (선택사항)" className="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-[13px] focus:ring-1 focus:ring-stone-300 outline-none mb-3" />
                 <div className="flex gap-2">
                   {(['essential','thinking','unnecessary'] as WishNecessity[]).map(n => (
                      <button type="button" key={n} onClick={() => setNecessity(n)} className={`flex-1 py-2 rounded-lg text-[12px] font-bold border transition-all ${necessity === n ? 'border-stone-400 bg-stone-800 text-white shadow-sm' : 'border-stone-100 text-stone-400 hover:bg-stone-50'}`}>

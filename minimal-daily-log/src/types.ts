@@ -1,5 +1,5 @@
 export type BodyWeightState = 'light' | 'normal' | 'heavy' | 'very_heavy' | 'very_light';
-export type RhythmState = 'none' | 'weak' | 'normal' | 'strong';
+export type RhythmState = 'none' | 'weak' | 'normal' | 'strong' | 'yes';
 export type WalkState = 'none' | '10min' | '20min' | 'over_30min';
 export type MuscleState = 'none' | 'done';
 export type BodyCheckState = 'none' | 'done';

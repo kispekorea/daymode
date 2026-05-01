@@ -18,14 +18,14 @@ service cloud.firestore {
              data.userId is string && data.userId.size() <= 128 &&
              data.createdAt is number &&
              data.updatedAt is number &&
-             data.get('weight', '') is string && data.get('weight', '').size() <= 64 &&
-             data.get('rhythm', '') is string && data.get('rhythm', '').size() <= 64 &&
-             data.get('walk', '') is string && data.get('walk', '').size() <= 64 &&
-             data.get('muscle', '') is string && data.get('muscle', '').size() <= 64 &&
-             data.get('bodyCheck', '') is string && data.get('bodyCheck', '').size() <= 64 &&
-             data.get('sleep', '') is string && data.get('sleep', '').size() <= 64 &&
-             data.get('imageUrl', '') is string && data.get('imageUrl', '').size() <= 2000 &&
-             data.get('moodEmoji', '') is string && data.get('moodEmoji', '').size() <= 64 &&
+             (data.get('weight', null) == null || (data.weight is string && data.weight.size() <= 64)) &&
+             (data.get('rhythm', null) == null || (data.rhythm is string && data.rhythm.size() <= 64)) &&
+             (data.get('walk', null) == null || (data.walk is string && data.walk.size() <= 64)) &&
+             (data.get('muscle', null) == null || (data.muscle is string && data.muscle.size() <= 64)) &&
+             (data.get('bodyCheck', null) == null || (data.bodyCheck is string && data.bodyCheck.size() <= 64)) &&
+             (data.get('sleep', null) == null || (data.sleep is string && data.sleep.size() <= 64)) &&
+             (data.get('imageUrl', null) == null || (data.imageUrl is string && data.imageUrl.size() <= 1000000)) &&
+             (data.get('moodEmoji', null) == null || (data.moodEmoji is string && data.moodEmoji.size() <= 64)) &&
              data.userId == request.auth.uid;
     }
     
@@ -38,8 +38,8 @@ service cloud.firestore {
              data.status is string && data.status.size() <= 64 &&
              data.necessity is string && data.necessity.size() <= 64 &&
              data.price is string && data.price.size() <= 128 &&
-             data.imageUrl is string && data.imageUrl.size() <= 2000 &&
-             data.get('linkUrl', '') is string && data.get('linkUrl', '').size() <= 2000 &&
+             data.imageUrl is string && data.imageUrl.size() <= 1000000 &&
+             (data.get('linkUrl', null) == null || (data.linkUrl is string && data.linkUrl.size() <= 2000)) &&
              data.userId is string && data.userId.size() <= 128 &&
              data.createdAt is number &&
              data.updatedAt is number &&
@@ -86,8 +86,8 @@ service cloud.firestore {
              data.date is string && data.date.size() <= 64 &&
              data.title is string && data.title.size() <= 500 &&
              data.content is string && data.content.size() <= 50000 &&
-             data.get('imageUrl', '') is string && data.get('imageUrl', '').size() <= 2000 &&
-             data.get('audioUrl', '') is string && data.get('audioUrl', '').size() <= 2000 &&
+             (data.get('imageUrl', null) == null || (data.imageUrl is string && data.imageUrl.size() <= 1000000)) &&
+             (data.get('audioUrl', null) == null || (data.audioUrl is string && data.audioUrl.size() <= 1000000)) &&
              data.userId is string && data.userId.size() <= 128 &&
              data.createdAt is number &&
              data.updatedAt is number &&

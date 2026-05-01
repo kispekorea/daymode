@@ -63,6 +63,7 @@ export default function HomeView() {
   const allCompleted = 
     todayRecord.weight !== null && 
     todayRecord.rhythm !== null && 
+    todayRecord.rhythm !== 'yes' &&
     todayRecord.walk !== null && 
     todayRecord.muscle !== null && 
     todayRecord.bodyCheck !== null &&
@@ -275,7 +276,7 @@ export default function HomeView() {
             {[
               { value: 'light', label: '가벼움' },
               { value: 'normal', label: '보통' },
-              { value: 'heavy', label: '무거움' },
+              { value: 'heavy', label: '약간 무거움' },
               { value: 'very_heavy', label: '매우 무거움' }
             ].map(opt => {
               const isActive = todayRecord.weight === opt.value || (opt.value === 'light' && todayRecord.weight === 'very_light');
@@ -316,9 +317,9 @@ export default function HomeView() {
               없음
             </button>
             <button
-              onClick={() => updateRecord({ rhythm: todayRecord.rhythm !== 'none' ? todayRecord.rhythm : 'normal' })}
+              onClick={() => updateRecord({ rhythm: (todayRecord.rhythm === 'none' || todayRecord.rhythm === null) ? 'yes' : todayRecord.rhythm })}
               className={`py-3 px-2 flex-1 rounded-[16px] text-[13px] font-bold transition-all active:scale-[0.98] hover:-translate-y-0.5 duration-200 ease-out flex items-center justify-center ${
-                todayRecord.rhythm !== 'none'
+                todayRecord.rhythm !== 'none' && todayRecord.rhythm !== null
                   ? 'bg-stone-200 text-stone-800 border-stone-300 shadow-inner'
                   : 'bg-white/60 border border-white text-stone-500 hover:bg-white/80'
               }`}
@@ -452,7 +453,7 @@ export default function HomeView() {
             {[
               { value: 'not_enough', label: '부족' },
               { value: 'adequate', label: '적정' },
-              { value: 'too_much', label: '많음' }
+              { value: 'too_much', label: '과다' }
             ].map(opt => (
               <button
                 key={opt.value}
@@ -543,7 +544,7 @@ export default function HomeView() {
                            if (value === 5) return ['매우 가벼움', ''];
                            if (value === 4) return ['가벼움', ''];
                            if (value === 3) return ['보통', ''];
-                           if (value === 2) return ['무거움', ''];
+                           if (value === 2) return ['약간 무거움', ''];
                            if (value === 1) return ['매우 무거움', ''];
                            return [value, ''];
                         }}

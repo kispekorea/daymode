@@ -18,7 +18,10 @@ export default function MemoView() {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(() => {
+    const offset = new Date().getTimezoneOffset() * 60000;
+    return new Date(Date.now() - offset).toISOString().split('T')[0];
+  });
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState<string>('');
@@ -99,7 +102,8 @@ export default function MemoView() {
     setContent('');
     setImageUrl('');
     setAudioUrl('');
-    setDate(new Date().toISOString().split('T')[0]);
+    const offset = new Date().getTimezoneOffset() * 60000;
+    setDate(new Date(Date.now() - offset).toISOString().split('T')[0]);
   };
 
   const handleEditClick = (item: MemoItem) => {
@@ -133,7 +137,8 @@ export default function MemoView() {
                setContent('');
                setImageUrl('');
                setAudioUrl('');
-               setDate(new Date().toISOString().split('T')[0]);
+               const offset = new Date().getTimezoneOffset() * 60000;
+               setDate(new Date(Date.now() - offset).toISOString().split('T')[0]);
             } else {
                setIsAdding(true);
                setEditingId(null);
@@ -141,7 +146,8 @@ export default function MemoView() {
                setContent('');
                setImageUrl('');
                setAudioUrl('');
-               setDate(new Date().toISOString().split('T')[0]);
+               const offset = new Date().getTimezoneOffset() * 60000;
+               setDate(new Date(Date.now() - offset).toISOString().split('T')[0]);
             }
           }} 
           className="bg-stone-900 text-white w-9 h-9 rounded-full flex items-center justify-center hover:bg-stone-800 transition-transform active:scale-95 shadow-sm"
@@ -159,8 +165,8 @@ export default function MemoView() {
             className="bg-white p-5 rounded-2xl shadow-sm border border-stone-100 mb-6 space-y-3 overflow-hidden"
             onSubmit={handleAdd}
           >
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-stone-300 outline-none" required />
-            <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="어떤 생각을 기록할까요? (#태그를 활용해보세요)" className="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-stone-300 outline-none resize-none" rows={4} />
+            <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="어떤 생각을 기록할까요? (#태그를 활용해보세요)" className="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-[15px] focus:ring-1 focus:ring-stone-300 outline-none resize-none font-medium h-32" />
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-[13px] focus:ring-1 focus:ring-stone-300 outline-none text-stone-500 font-bold" required />
             
             {/* Attachments Preview */}
             {(imageUrl || audioUrl) && (
